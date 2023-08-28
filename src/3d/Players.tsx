@@ -211,15 +211,18 @@ export default function Players() {
         if (position.y !== pos.y) position.y = pos.y;
         if (position.z !== pos.z) position.z = pos.z;
 
-        // retrieve shared rotation
-        const rot = state.getState("rot");
-        if (rot === undefined) continue;
+        const dir = state.getState("dir");
 
-        playerRef.current.rotation.y = rot;
+        const angle = Math.atan2(dir.x, dir.z);
 
-        // // smooth rotation
-        // playerRef.current.rotation.y +=
-        //   (rot.y - playerRef.current.rotation.y) * ROT_SPEED * delta;
+        // smooth rotation
+        const smoothedAngle = smoothAngle(
+          playerRef.current.rotation.y,
+          angle,
+          delta * ROTATION_SPEED
+        );
+
+        playerRef.current.rotation.y = smoothedAngle;
 
         // retrieve shared animation
         const animation = state.getState("anim");

@@ -1,7 +1,3 @@
-// import * as THREE from "three";
-// import React, { useRef } from "react";
-// import { useGLTF, useAnimations } from "@react-three/drei";
-
 import { useEffect, useMemo, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
@@ -9,10 +5,14 @@ import { useGraph } from "@react-three/fiber";
 import { GLTF } from "three-stdlib";
 import * as THREE from "three";
 
+import { materials } from "../environment/materials";
+
 type GLTFResult = GLTF & {
   nodes: {
     ArmLeft: THREE.SkinnedMesh;
+    ArmLeftUp: THREE.SkinnedMesh;
     ArmRight: THREE.SkinnedMesh;
+    ArmRightUp: THREE.SkinnedMesh;
     Ass: THREE.SkinnedMesh;
     Chest: THREE.SkinnedMesh;
     handLeft: THREE.SkinnedMesh;
@@ -22,23 +22,39 @@ type GLTFResult = GLTF & {
     Head: THREE.SkinnedMesh;
     legRight: THREE.SkinnedMesh;
     legRight_1: THREE.SkinnedMesh;
+    legRight002: THREE.SkinnedMesh;
+    legRight002_1: THREE.SkinnedMesh;
+    legRight001: THREE.SkinnedMesh;
+    legRight001_1: THREE.SkinnedMesh;
     legLeft: THREE.SkinnedMesh;
     legLeft_1: THREE.SkinnedMesh;
+    legLeft002: THREE.SkinnedMesh;
+    legLeft002_1: THREE.SkinnedMesh;
+    legLeft001: THREE.SkinnedMesh;
+    legLeft001_1: THREE.SkinnedMesh;
     Root: THREE.Bone;
   };
   materials: {};
   animations: GLTFAction[];
 };
 
-export type ActionName = "Idle" | "Run" | "Shoot" | "Walk";
+type TSide = "left" | "right" | undefined;
 
 interface GLTFAction extends THREE.AnimationClip {
   name: ActionName;
 }
 
+export type ActionName = "Idle" | "Run" | "Shoot" | "Walk";
+
 const MODEL = "/3d/characters/legoman.glb";
 
-export function Character({ animation }: { animation: ActionName }) {
+export function Character({
+  animation,
+  side = "left",
+}: {
+  animation: ActionName;
+  side: TSide;
+}) {
   const characterRef = useRef(null);
   const { scene, animations } = useGLTF(MODEL) as GLTFResult;
   const clone = useMemo(() => SkeletonUtils.clone(scene), [scene]);
@@ -54,44 +70,56 @@ export function Character({ animation }: { animation: ActionName }) {
   }, [animation]);
 
   return (
-    <group ref={characterRef} dispose={null}>
+    <group ref={characterRef} scale={0.5} dispose={null}>
       <group name="Scene">
         <group name="Armature">
           <skinnedMesh
             name="ArmLeft"
             geometry={nodes.ArmLeft.geometry}
-            material={nodes.ArmLeft.material}
+            material={materials.yellow}
             skeleton={nodes.ArmLeft.skeleton}
+          />
+          <skinnedMesh
+            name="ArmLeftUp"
+            geometry={nodes.ArmLeftUp.geometry}
+            material={side === "left" ? materials.red : materials.blue}
+            skeleton={nodes.ArmLeftUp.skeleton}
           />
           <skinnedMesh
             name="ArmRight"
             geometry={nodes.ArmRight.geometry}
-            material={nodes.ArmRight.material}
+            material={materials.yellow}
             skeleton={nodes.ArmRight.skeleton}
+          />
+          <skinnedMesh
+            name="ArmRightUp"
+            geometry={nodes.ArmRightUp.geometry}
+            material={side === "left" ? materials.red : materials.blue}
+            skeleton={nodes.ArmRightUp.skeleton}
           />
           <skinnedMesh
             name="Ass"
             geometry={nodes.Ass.geometry}
-            material={nodes.Ass.material}
+            material={materials.white}
             skeleton={nodes.Ass.skeleton}
           />
           <skinnedMesh
             name="Chest"
             geometry={nodes.Chest.geometry}
-            material={nodes.Chest.material}
+            material={side === "left" ? materials.red : materials.blue}
             skeleton={nodes.Chest.skeleton}
           />
           <group name="HandLeft">
             <skinnedMesh
               name="handLeft"
               geometry={nodes.handLeft.geometry}
-              material={nodes.handLeft.material}
+              material={materials.yellow}
               skeleton={nodes.handLeft.skeleton}
             />
             <skinnedMesh
               name="handLeft_1"
               geometry={nodes.handLeft_1.geometry}
-              material={nodes.handLeft_1.material}
+              material={materials.yellow}
               skeleton={nodes.handLeft_1.skeleton}
             />
           </group>
@@ -99,48 +127,104 @@ export function Character({ animation }: { animation: ActionName }) {
             <skinnedMesh
               name="handRight"
               geometry={nodes.handRight.geometry}
-              material={nodes.handRight.material}
+              material={materials.yellow}
               skeleton={nodes.handRight.skeleton}
             />
             <skinnedMesh
               name="handRight_1"
               geometry={nodes.handRight_1.geometry}
-              material={nodes.handRight_1.material}
+              material={materials.yellow}
               skeleton={nodes.handRight_1.skeleton}
             />
           </group>
           <skinnedMesh
             name="Head"
             geometry={nodes.Head.geometry}
-            material={nodes.Head.material}
+            material={materials.yellow}
             skeleton={nodes.Head.skeleton}
           />
           <group name="LegRight">
             <skinnedMesh
               name="legRight"
               geometry={nodes.legRight.geometry}
-              material={nodes.legRight.material}
+              material={materials.yellow}
               skeleton={nodes.legRight.skeleton}
             />
             <skinnedMesh
               name="legRight_1"
               geometry={nodes.legRight_1.geometry}
-              material={nodes.legRight_1.material}
+              material={materials.yellow}
               skeleton={nodes.legRight_1.skeleton}
+            />
+          </group>
+          <group name="LegRightFoot">
+            <skinnedMesh
+              name="legRight002"
+              geometry={nodes.legRight002.geometry}
+              material={materials.black}
+              skeleton={nodes.legRight002.skeleton}
+            />
+            <skinnedMesh
+              name="legRight002_1"
+              geometry={nodes.legRight002_1.geometry}
+              material={materials.black}
+              skeleton={nodes.legRight002_1.skeleton}
+            />
+          </group>
+          <group name="LegRightUp">
+            <skinnedMesh
+              name="legRight001"
+              geometry={nodes.legRight001.geometry}
+              material={materials.white}
+              skeleton={nodes.legRight001.skeleton}
+            />
+            <skinnedMesh
+              name="legRight001_1"
+              geometry={nodes.legRight001_1.geometry}
+              material={materials.white}
+              skeleton={nodes.legRight001_1.skeleton}
             />
           </group>
           <group name="LegsLeft">
             <skinnedMesh
               name="legLeft"
               geometry={nodes.legLeft.geometry}
-              material={nodes.legLeft.material}
+              material={materials.yellow}
               skeleton={nodes.legLeft.skeleton}
             />
             <skinnedMesh
               name="legLeft_1"
               geometry={nodes.legLeft_1.geometry}
-              material={nodes.legLeft_1.material}
+              material={materials.yellow}
               skeleton={nodes.legLeft_1.skeleton}
+            />
+          </group>
+          <group name="LegsLeftFoot">
+            <skinnedMesh
+              name="legLeft002"
+              geometry={nodes.legLeft002.geometry}
+              material={materials.black}
+              skeleton={nodes.legLeft002.skeleton}
+            />
+            <skinnedMesh
+              name="legLeft002_1"
+              geometry={nodes.legLeft002_1.geometry}
+              material={materials.black}
+              skeleton={nodes.legLeft002_1.skeleton}
+            />
+          </group>
+          <group name="LegsLeftUp">
+            <skinnedMesh
+              name="legLeft001"
+              geometry={nodes.legLeft001.geometry}
+              material={materials.white}
+              skeleton={nodes.legLeft001.skeleton}
+            />
+            <skinnedMesh
+              name="legLeft001_1"
+              geometry={nodes.legLeft001_1.geometry}
+              material={materials.white}
+              skeleton={nodes.legLeft001_1.skeleton}
             />
           </group>
           <primitive object={nodes.Root} />
