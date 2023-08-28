@@ -15,16 +15,14 @@ export default function Experience() {
           { name: "down", keys: ["ArrowDown"] },
           { name: "left", keys: ["ArrowLeft"] },
           { name: "right", keys: ["ArrowRight"] },
-          { name: "jump", keys: ["KeyX"] },
-          { name: "bomb", keys: ["KeyC"] },
-          { name: "restaure", keys: ["KeyR"] },
-          { name: "reset", keys: ["KeyP"] },
+          { name: "shoot", keys: ["KeyX"] },
+          { name: "reset", keys: ["KeyR"] },
         ]}
       >
         <Canvas
           shadows
           camera={{
-            position: [0, 10, 7],
+            position: [0, 15, 11],
             fov: 50,
             near: 0.1,
             far: 1000,
