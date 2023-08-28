@@ -71,7 +71,7 @@ const LocalPlayer = forwardRef(
         position={position}
         linearDamping={0.7}
       >
-        <CapsuleCollider args={[0.12, 0.3]} />
+        <CapsuleCollider args={[0.5, 0.3]} />
       </RigidBody>
     );
   }

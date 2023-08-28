@@ -11,7 +11,7 @@ export default function Scene() {
     <>
       <Lights />
       <Suspense fallback={null}>
-        <Physics debug>
+        <Physics>
           <Arena />
           <Players />
         </Physics>
