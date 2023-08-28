@@ -1,16 +1,10 @@
-import { CuboidCollider, RigidBody } from "@react-three/rapier";
+import { RigidBody } from "@react-three/rapier";
 
 export default function Arena() {
   return (
-    <RigidBody type="fixed" colliders={false}>
-      <CuboidCollider
-        args={[10, 1, 10]}
-        position={[0, -0.5, 0]}
-        friction={0.7}
-        restitution={0.3}
-      />
+    <RigidBody type="fixed" colliders={"cuboid"}>
       <mesh>
-        <boxGeometry args={[10, 1, 10]} />
+        <boxGeometry args={[22, 1, 12]} />
         <meshStandardMaterial color="green" />
       </mesh>
     </RigidBody>
