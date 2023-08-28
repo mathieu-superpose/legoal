@@ -7,6 +7,8 @@ export const MAX_SPEED = 5;
 
 export const ROTATION_SPEED = 5;
 
+export const SHOOT_TIME = 0.8;
+
 /*
 // // // ARENA
 */

@@ -16,6 +16,7 @@ import {
   AREA_SIZE,
   MAX_SPEED,
   ROTATION_SPEED,
+  SHOOT_TIME,
   VELOCITY,
 } from "../utils/constants";
 import { smoothAngle } from "../utils/angles";
@@ -85,6 +86,7 @@ export default function Players() {
   const down = useKeyboardControls((state) => state.down);
   const left = useKeyboardControls((state) => state.left);
   const right = useKeyboardControls((state) => state.right);
+  const shoot = useKeyboardControls((state) => state.shoot);
 
   const direction = new THREE.Vector3();
 
@@ -122,7 +124,7 @@ export default function Players() {
     });
   }, []);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     // keyboard controls
     direction.x = Number(right) - Number(left);
     direction.z = Number(down) - Number(up);
@@ -130,6 +132,20 @@ export default function Players() {
 
     // update shared direction inputs
     myPlayer().setState("dir", direction);
+
+    // shoot
+    const elapsedTime = state.clock.getElapsedTime();
+    const lastShot = myPlayer().getState("lastShot") || 0;
+    const isShooting = myPlayer().getState("shoot") || false;
+
+    if (shoot && elapsedTime - lastShot > SHOOT_TIME) {
+      myPlayer().setState("lastShot", elapsedTime);
+      myPlayer().setState("shoot", true);
+    }
+
+    if (elapsedTime - lastShot > SHOOT_TIME && isShooting) {
+      myPlayer().setState("shoot", false);
+    }
 
     for (const player of players) {
       const state = player.state;
@@ -173,7 +189,8 @@ export default function Players() {
 
         // update animation
 
-        const animation = getAnimation(linvel);
+        const isShooting = state.getState("shoot") || false;
+        const animation = isShooting ? "Shoot" : getAnimation(linvel);
 
         if (playerRef.current?.name !== animation) {
           playerRef.current.name = animation;
