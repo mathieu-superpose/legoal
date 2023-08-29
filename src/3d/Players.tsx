@@ -17,11 +17,14 @@ import {
   MAX_SPEED,
   ROTATION_SPEED,
   SHOOT_TIME,
+  SHOOT_VELOCITY,
   VELOCITY,
 } from "../utils/constants";
 import { smoothAngle } from "../utils/angles";
 import { getAnimation } from "../utils/animation";
 import { randomStartPos } from "../utils/randomPosition";
+
+import useGame from "../store/useGame";
 
 import { ActionName, Character } from "./Character";
 
@@ -90,6 +93,10 @@ export default function Players() {
 
   const direction = new THREE.Vector3();
 
+  const updateImpulseX = useGame((state) => state.updateImpulseX);
+  const updateImpulseY = useGame((state) => state.updateImpulseY);
+  const updateImpulseZ = useGame((state) => state.updateImpulseZ);
+
   useEffect(() => {
     onPlayerJoin(async (state: PlayerState) => {
       const playerRef = createRef();
@@ -147,6 +154,9 @@ export default function Players() {
       myPlayer().setState("shoot", false);
     }
 
+    // retrieve ball
+    const ball = state.scene.getObjectByName("ball");
+
     for (const player of players) {
       const state = player.state;
 
@@ -188,19 +198,20 @@ export default function Players() {
         if (playerPos.z !== pos.z) playerPos.z = pos.z;
 
         // update animation
-
         const isShooting = state.getState("shoot") || false;
         const animation = isShooting ? "Shoot" : getAnimation(linvel);
+
+        let shot = true;
 
         if (playerRef.current?.name !== animation) {
           playerRef.current.name = animation;
           state.setState("anim", animation);
+          shot = false;
         }
 
         // rotate the player
         if (dir.x || dir.z) {
           const angle = Math.atan2(dir.x, dir.z);
-
           // smooth rotation
           const smoothedAngle = smoothAngle(
             playerRef.current.rotation.y,
@@ -212,6 +223,37 @@ export default function Players() {
 
           // update shared rotation
           state.setState("rot", angle);
+        }
+
+        // // shoot
+        if (isShooting && !shot) {
+          if (!ball) return;
+
+          const ballPos = ball?.position;
+          const ballDistance = ballPos?.distanceTo(playerPos) || 2;
+
+          const ballAngle = Math.atan2(
+            ballPos?.x - playerPos.x,
+            ballPos?.z - playerPos.z
+          );
+
+          if (ballDistance < 1) {
+            const dir = new THREE.Vector3(
+              Math.sin(ballAngle),
+              0,
+              Math.cos(ballAngle)
+            );
+
+            const impulse = {
+              x: dir.x * SHOOT_VELOCITY * delta,
+              y: 0.5 * SHOOT_VELOCITY * delta,
+              z: dir.z * SHOOT_VELOCITY * delta,
+            };
+
+            updateImpulseX(impulse.x);
+            updateImpulseY(impulse.y);
+            updateImpulseZ(impulse.z);
+          }
         }
       } else {
         // update character
