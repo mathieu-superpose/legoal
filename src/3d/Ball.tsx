@@ -1,41 +1,20 @@
-import { createRef, forwardRef } from "react";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { BallCollider, RigidBody } from "@react-three/rapier";
+import { BallCollider, RigidBody, RapierRigidBody } from "@react-three/rapier";
 import { getState, isHost, setState } from "playroomkit";
 
-const SocketBall = forwardRef(({ position, rotation }, ref) => {
-  return (
-    <group ref={ref} position={position} rotation={rotation}>
-      <mesh>
-        <sphereGeometry args={[0.3, 16, 16]} />
-        <meshStandardMaterial color="red" />
-      </mesh>
-    </group>
-  );
-});
-
-const LocalBall = forwardRef(({ position }, ref) => {
-  return (
-    <RigidBody
-      ref={ref}
-      name="ball"
-      colliders={false}
-      position={position}
-      type="dynamic"
-    >
-      <BallCollider args={[0.4]} />
-    </RigidBody>
-  );
-});
+import useGame from "../store/useGame";
 
 export default function Ball() {
-  const modelRef = createRef();
-  const bodyRef = createRef();
+  const modelRef = useRef(null);
+  const bodyRef = useRef<RapierRigidBody>(null);
 
-  const model = (
-    <SocketBall ref={modelRef} position={[0, 1, 0]} rotation={[0, 0, 0]} />
-  );
-  const body = <LocalBall ref={bodyRef} position={[0, 1, 0]} />;
+  const impulseX = useGame((state) => state.impulseX);
+  const impulseY = useGame((state) => state.impulseY);
+  const impulseZ = useGame((state) => state.impulseZ);
+  const updateImpulseX = useGame((state) => state.updateImpulseX);
+  const updateImpulseY = useGame((state) => state.updateImpulseY);
+  const updateImpulseZ = useGame((state) => state.updateImpulseZ);
 
   useFrame(() => {
     let pos;
@@ -45,6 +24,24 @@ export default function Ball() {
       // // HOST UPDATE
     */
     if (isHost()) {
+      if (impulseX !== 0 || impulseY !== 0 || impulseZ !== 0) {
+        // const body = bodyRef?.current;
+        // if (!body) return;
+
+        const impulse = {
+          x: impulseX || 0,
+          y: impulseY || 0,
+          z: impulseZ || 0,
+        };
+
+        if (!bodyRef?.current) return;
+        bodyRef?.current?.applyImpulse(impulse, true);
+
+        updateImpulseX(0);
+        updateImpulseY(0);
+        updateImpulseZ(0);
+      }
+
       pos = bodyRef?.current?.translation();
       if (!pos) return;
 
@@ -66,7 +63,6 @@ export default function Ball() {
       rot = updatedState.bombRot;
     }
 
-    console.log("updatePosRot", pos, rot);
     // model position
     modelRef.current.position.x = pos.x;
     modelRef.current.position.y = pos.y;
@@ -78,10 +74,36 @@ export default function Ball() {
     modelRef.current.rotation.z = rot.z;
   });
 
+  if (isHost())
+    return (
+      <group>
+        <group ref={modelRef} position={[0, 2, 0]} rotation={[0, 0, 0]}>
+          <mesh>
+            <sphereGeometry args={[0.3, 16, 16]} />
+            <meshStandardMaterial color="red" />
+          </mesh>
+        </group>
+
+        <RigidBody
+          ref={bodyRef}
+          name="ball"
+          colliders={false}
+          position={[0, 2, 0]}
+          type="dynamic"
+        >
+          <BallCollider args={[0.4]} />
+        </RigidBody>
+      </group>
+    );
+
   return (
     <group>
-      {model}
-      {isHost() ? body : null}
+      <group ref={modelRef} position={[0, 2, 0]} rotation={[0, 0, 0]}>
+        <mesh>
+          <sphereGeometry args={[0.3, 16, 16]} />
+          <meshStandardMaterial color="red" />
+        </mesh>
+      </group>
     </group>
   );
 }
