@@ -19,6 +19,7 @@ import {
   SHOOT_TIME,
   SHOOT_VELOCITY,
   VELOCITY,
+  SHOOT_VERTICAL_VELOCITY,
 } from "../utils/constants";
 import { smoothAngle } from "../utils/angles";
 import { getAnimation } from "../utils/animation";
@@ -26,21 +27,23 @@ import { randomStartPos } from "../utils/randomPosition";
 
 import useGame from "../store/useGame";
 
-import { ActionName, Character } from "./Character";
+import { ActionName, Character, TTeam } from "./Character";
 
 const SocketPlayer = forwardRef(
   (
     {
       position,
       rotation,
+      id,
     }: {
       position: THREE.Vector3 | undefined;
       rotation: THREE.Euler | undefined;
+      id: string;
     },
     ref: Ref<THREE.Group> | undefined
   ) => {
-    const [currentAnimation, setCurrentAnimation] =
-      useState<ActionName>("Idle");
+    const [currentAnimation, setCurrentAnimation] = useState<ActionName>("Idle");
+    const [currentTeam] = useState<TTeam>("black");
 
     useFrame(() => {
       if (!ref) return;
@@ -53,7 +56,7 @@ const SocketPlayer = forwardRef(
     return (
       <group ref={ref} position={position} rotation={rotation}>
         <Suspense fallback={null}>
-          <Character animation={currentAnimation} />
+          <Character animation={currentAnimation} team={currentTeam} />
         </Suspense>
       </group>
     );
@@ -107,6 +110,7 @@ export default function Players() {
       const currCharacter = (
         <SocketPlayer
           key={state.id}
+          id={state.id}
           ref={playerRef}
           position={startPos}
           rotation={new THREE.Euler(0, 0, 0)}
@@ -123,11 +127,11 @@ export default function Players() {
       setPlayers((players) => [...players, { state, playerRef, bodyRef }]);
       setCharacters((characters) => [...characters, currCharacter]);
 
-      state.onQuit(() => {
-        setCharacters((characters) =>
-          characters.filter((p) => p.state.id !== currCharacter.id)
-        );
-      });
+      // state.onQuit(() => {
+      //   setCharacters((characters) =>
+      //     characters.filter((p) => p.state.id !== state.id)
+      //   );
+      // });
     });
   }, []);
 
@@ -244,15 +248,9 @@ export default function Players() {
               Math.cos(ballAngle)
             );
 
-            const impulse = {
-              x: dir.x * SHOOT_VELOCITY * delta,
-              y: 0.35 * SHOOT_VELOCITY * delta,
-              z: dir.z * SHOOT_VELOCITY * delta,
-            };
-
-            updateImpulseX(impulse.x);
-            updateImpulseY(impulse.y);
-            updateImpulseZ(impulse.z);
+            updateImpulseX(dir.x * SHOOT_VELOCITY + linvel.x * 0.5);
+            updateImpulseY(SHOOT_VERTICAL_VELOCITY * SHOOT_VELOCITY);
+            updateImpulseZ(dir.z * SHOOT_VELOCITY + linvel.z * 0.5);
           }
         }
       } else {

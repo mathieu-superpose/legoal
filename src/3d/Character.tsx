@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { useGraph } from "@react-three/fiber";
@@ -38,22 +38,22 @@ type GLTFResult = GLTF & {
   animations: GLTFAction[];
 };
 
-type TSide = "left" | "right" | undefined;
-
 interface GLTFAction extends THREE.AnimationClip {
   name: ActionName;
 }
 
 export type ActionName = "Idle" | "Run" | "Shoot" | "Walk";
 
+export type TTeam = "red" | "blue" | "black";
+
 const MODEL = "/3d/characters/legoman.glb";
 
 export function Character({
   animation,
-  side = "left",
+  team,
 }: {
   animation: ActionName;
-  side: TSide;
+  team: TTeam;
 }) {
   const characterRef = useRef(null);
   const { scene, animations } = useGLTF(MODEL) as GLTFResult;
@@ -81,7 +81,7 @@ export function Character({
         <skinnedMesh
           name="ArmLeftUp"
           geometry={nodes.ArmLeftUp.geometry}
-          material={side === "left" ? materials.red : materials.blue}
+          material={materials[team]}
           skeleton={nodes.ArmLeftUp.skeleton}
         />
         <skinnedMesh
@@ -93,7 +93,7 @@ export function Character({
         <skinnedMesh
           name="ArmRightUp"
           geometry={nodes.ArmRightUp.geometry}
-          material={side === "left" ? materials.red : materials.blue}
+          material={materials[team]}
           skeleton={nodes.ArmRightUp.skeleton}
         />
         <skinnedMesh
@@ -105,7 +105,7 @@ export function Character({
         <skinnedMesh
           name="Chest"
           geometry={nodes.Chest.geometry}
-          material={side === "left" ? materials.red : materials.blue}
+          material={materials[team]}
           skeleton={nodes.Chest.skeleton}
         />
         <group name="HandLeft">
