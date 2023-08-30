@@ -24,10 +24,17 @@ export default function Ball() {
       // // HOST UPDATE
     */
     if (isHost()) {
-      if (impulseX !== 0 || impulseY !== 0 || impulseZ !== 0) {
-        // const body = bodyRef?.current;
-        // if (!body) return;
+      pos = bodyRef?.current?.translation();
+      if (!pos) return;
 
+      // replace ball
+      if (pos.y < -2) {
+        bodyRef.current.setTranslation({ x: 0, y: 2, z: 0 }, true);
+        bodyRef.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
+        bodyRef.current.setAngvel({ x: 0, y: 0, z: 0 }, true);
+      }
+
+      if (impulseX !== 0 || impulseY !== 0 || impulseZ !== 0) {
         const impulse = {
           x: impulseX || 0,
           y: impulseY || 0,
@@ -41,9 +48,6 @@ export default function Ball() {
         updateImpulseY(0);
         updateImpulseZ(0);
       }
-
-      pos = bodyRef?.current?.translation();
-      if (!pos) return;
 
       rot = bodyRef?.current?.rotation();
       if (!rot) return;
@@ -77,7 +81,7 @@ export default function Ball() {
   if (isHost())
     return (
       <group>
-        <group ref={modelRef} position={[0, 2, 0]} rotation={[0, 0, 0]}>
+        <group ref={modelRef} position={[0, 3, 0]} rotation={[0, 0, 0]}>
           <mesh>
             <sphereGeometry args={[0.3, 16, 16]} />
             <meshStandardMaterial color="red" />
@@ -88,7 +92,7 @@ export default function Ball() {
           ref={bodyRef}
           name="ball"
           colliders={false}
-          position={[0, 2, 0]}
+          position={[0, 3, 0]}
           type="dynamic"
         >
           <BallCollider args={[0.4]} />
@@ -98,7 +102,7 @@ export default function Ball() {
 
   return (
     <group>
-      <group ref={modelRef} position={[0, 2, 0]} rotation={[0, 0, 0]}>
+      <group ref={modelRef} position={[0, 3, 0]} rotation={[0, 0, 0]}>
         <mesh>
           <sphereGeometry args={[0.3, 16, 16]} />
           <meshStandardMaterial color="red" />
