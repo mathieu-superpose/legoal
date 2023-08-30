@@ -11,4 +11,9 @@ Library: [React](https://react.dev/)
 R3F helpers: [Drei](https://github.com/pmndrs/drei)
 Physics: [Rapier](https://github.com/pmndrs/react-three-rapier)
 Stand-alone library of threejs examples: [three-stdlib](https://github.com/pmndrs/three-stdlib)
+Game state: [Zustand]()
 Multiplayer Socket: [Playroomkit](https://docs.joinplayroom.com/)
+
+## Assets
+
+Walls and flag retrieved from Mecabricks.com
