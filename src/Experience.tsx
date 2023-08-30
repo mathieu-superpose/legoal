@@ -2,6 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { KeyboardControls, Loader } from "@react-three/drei";
 
 import Scene from "./scenes/Scene";
+import Overlay from "./components/Overlay";
 
 import "./Experience.css";
 
@@ -30,6 +31,7 @@ export default function Experience() {
         </Canvas>
         <Loader />
       </KeyboardControls>
+      <Overlay />
     </div>
   );
 }

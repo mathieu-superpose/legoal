@@ -6,13 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import {
-  myPlayer,
-  isHost,
-  onPlayerJoin,
-  PlayerState,
-  usePlayersState,
-} from "playroomkit";
+import { myPlayer, isHost, onPlayerJoin, PlayerState } from "playroomkit";
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { CapsuleCollider, RigidBody } from "@react-three/rapier";
@@ -40,17 +34,16 @@ const SocketPlayer = forwardRef(
     {
       position,
       rotation,
-      id,
+      team,
     }: {
       position: THREE.Vector3 | undefined;
       rotation: THREE.Euler | undefined;
-      id: string;
+      team: TTeam;
     },
     ref: Ref<THREE.Group> | undefined
   ) => {
     const [currentAnimation, setCurrentAnimation] =
       useState<ActionName>("Idle");
-    const [currentTeam] = useState<TTeam>("red");
 
     useFrame(() => {
       if (!ref) return;
@@ -64,7 +57,7 @@ const SocketPlayer = forwardRef(
     return (
       <group ref={ref} position={position} rotation={rotation}>
         <Suspense fallback={null}>
-          <Character animation={currentAnimation} team={currentTeam} />
+          <Character animation={currentAnimation} team={team} />
         </Suspense>
       </group>
     );
@@ -115,6 +108,22 @@ export default function Players() {
 
       const startPos = randomStartPos(AREA_SIZE);
 
+      let team;
+
+      if (isHost()) {
+        // physicial body
+        const currBody = (
+          <LocalPlayer key={state.id} ref={bodyRef} position={startPos} />
+        );
+        setBodies((bodies) => [...bodies, currBody]);
+
+        // team
+        team = ["red", "blue", "black"][Math.floor(Math.random() * 2)];
+        state.setState("team", team);
+      } else {
+        team = "black";
+      }
+
       const currCharacter = (
         <SocketPlayer
           key={state.id}
@@ -122,17 +131,9 @@ export default function Players() {
           ref={playerRef}
           position={startPos}
           rotation={new THREE.Euler(0, 0, 0)}
+          team={team}
         />
       );
-
-      state.setState("team", "black");
-
-      if (isHost()) {
-        const currBody = (
-          <LocalPlayer key={state.id} ref={bodyRef} position={startPos} />
-        );
-        setBodies((bodies) => [...bodies, currBody]);
-      }
 
       setPlayers((players) => [...players, { state, playerRef, bodyRef }]);
       setCharacters((characters) => [...characters, currCharacter]);
