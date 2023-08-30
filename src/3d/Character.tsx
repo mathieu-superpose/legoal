@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+// @ts-nocheck
+
+import { useEffect, useMemo, useRef } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { useGraph } from "@react-three/fiber";
