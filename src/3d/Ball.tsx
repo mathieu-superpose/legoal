@@ -48,9 +48,7 @@ export default function Ball() {
       // // HOST UPDATE
     */
     if (isHost()) {
-      if (bodyRef?.current) return;
-
-      pos = bodyRef.current.translation();
+      pos = bodyRef?.current?.translation();
       if (!pos) return;
 
       // replace ball
@@ -93,8 +91,6 @@ export default function Ball() {
       pos = updatedState.bombPos;
       rot = updatedState.bombRot;
     }
-
-    if(modelRef?.current) return;
 
     // model position
     modelRef.current.position.x = pos.x;
