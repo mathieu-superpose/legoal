@@ -246,7 +246,7 @@ export default function Players() {
 
             const impulse = {
               x: dir.x * SHOOT_VELOCITY * delta,
-              y: 0.5 * SHOOT_VELOCITY * delta,
+              y: 0.35 * SHOOT_VELOCITY * delta,
               z: dir.z * SHOOT_VELOCITY * delta,
             };
 
