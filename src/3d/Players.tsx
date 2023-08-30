@@ -6,7 +6,13 @@ import {
   useEffect,
   useState,
 } from "react";
-import { myPlayer, isHost, onPlayerJoin, PlayerState } from "playroomkit";
+import {
+  myPlayer,
+  isHost,
+  onPlayerJoin,
+  PlayerState,
+  usePlayersState,
+} from "playroomkit";
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { CapsuleCollider, RigidBody } from "@react-three/rapier";
@@ -42,12 +48,14 @@ const SocketPlayer = forwardRef(
     },
     ref: Ref<THREE.Group> | undefined
   ) => {
-    const [currentAnimation, setCurrentAnimation] = useState<ActionName>("Idle");
-    const [currentTeam] = useState<TTeam>("black");
+    const [currentAnimation, setCurrentAnimation] =
+      useState<ActionName>("Idle");
+    const [currentTeam] = useState<TTeam>("red");
 
     useFrame(() => {
       if (!ref) return;
 
+      // update animation
       if (currentAnimation !== ref?.current?.name || "Idle") {
         setCurrentAnimation(ref?.current?.name || "Idle");
       }
@@ -116,6 +124,8 @@ export default function Players() {
           rotation={new THREE.Euler(0, 0, 0)}
         />
       );
+
+      state.setState("team", "black");
 
       if (isHost()) {
         const currBody = (
@@ -188,6 +198,13 @@ export default function Players() {
 
         // update shared position
         const pos = bodyRef.current.translation();
+
+        if (pos.y < -2) {
+          bodyRef.current.setTranslation({ x: 0, y: 2, z: 0 }, true);
+          bodyRef.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
+          bodyRef.current.setAngvel({ x: 0, y: 0, z: 0 }, true);
+        }
+
         state.setState("pos", pos);
 
         // update character
@@ -289,6 +306,14 @@ export default function Players() {
         }
       }
     }
+
+    // update cameraPosition
+    const myPos = myPlayer().getState("pos");
+    const camera = state.camera;
+
+    if (!camera || !myPos) return;
+
+    camera.position.x = myPos.x < -3 ? -3 : myPos.x > 3 ? 3 : myPos.x;
   });
 
   return (
