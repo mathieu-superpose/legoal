@@ -1,11 +1,33 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { BallCollider, RigidBody, RapierRigidBody } from "@react-three/rapier";
+import {
+  BallCollider,
+  RigidBody,
+  RapierRigidBody,
+  quat,
+  euler,
+} from "@react-three/rapier";
 import { getState, isHost, setState } from "playroomkit";
+import { useGLTF } from "@react-three/drei";
+import { GLTF } from "three-stdlib";
 
 import useGame from "../store/useGame";
 
+type GLTFResult = GLTF & {
+  nodes: {
+    Icosphere_1: THREE.Mesh;
+    Icosphere_2: THREE.Mesh;
+  };
+  materials: {
+    white: THREE.MeshStandardMaterial;
+    black: THREE.MeshStandardMaterial;
+  };
+};
+
+const MODEL = "3d/football.glb";
+
 export default function Ball() {
+  const { nodes, materials } = useGLTF(MODEL) as GLTFResult;
   const modelRef = useRef(null);
   const bodyRef = useRef<RapierRigidBody>(null);
 
@@ -50,6 +72,7 @@ export default function Ball() {
       }
 
       rot = bodyRef?.current?.rotation();
+      console.log(rot);
       if (!rot) return;
 
       setState("ball", { bombPos: pos, bombRot: rot }, false);
@@ -72,20 +95,32 @@ export default function Ball() {
     modelRef.current.position.y = pos.y;
     modelRef.current.position.z = pos.z;
 
+    const eulerRot = euler().setFromQuaternion(quat(rot));
+
     // model rotation
-    modelRef.current.rotation.x = rot.x;
-    modelRef.current.rotation.y = rot.y;
-    modelRef.current.rotation.z = rot.z;
+    modelRef.current.rotation.x = eulerRot.x;
+    modelRef.current.rotation.y = eulerRot.y;
+    modelRef.current.rotation.z = eulerRot.z;
   });
 
   if (isHost())
     return (
       <group>
-        <group ref={modelRef} position={[0, 3, 0]} rotation={[0, 0, 0]}>
-          <mesh>
-            <sphereGeometry args={[0.3, 16, 16]} />
-            <meshStandardMaterial color="red" />
-          </mesh>
+        <group ref={modelRef} position={[0, 3, 0]}>
+          <group dispose={null} scale={0.4}>
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.Icosphere_1.geometry}
+              material={materials.white}
+            />
+            <mesh
+              castShadow
+              receiveShadow
+              geometry={nodes.Icosphere_2.geometry}
+              material={materials.black}
+            />
+          </group>
         </group>
 
         <RigidBody
@@ -101,13 +136,23 @@ export default function Ball() {
     );
 
   return (
-    <group>
-      <group ref={modelRef} position={[0, 3, 0]} rotation={[0, 0, 0]}>
-        <mesh>
-          <sphereGeometry args={[0.3, 16, 16]} />
-          <meshStandardMaterial color="red" />
-        </mesh>
+    <group ref={modelRef}>
+      <group dispose={null} scale={0.4}>
+        <mesh
+          castShadow
+          receiveShadow
+          geometry={nodes.Icosphere_1.geometry}
+          material={materials.white}
+        />
+        <mesh
+          castShadow
+          receiveShadow
+          geometry={nodes.Icosphere_2.geometry}
+          material={materials.black}
+        />
       </group>
     </group>
   );
 }
+
+useGLTF.preload(MODEL);

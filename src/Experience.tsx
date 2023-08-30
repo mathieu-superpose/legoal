@@ -1,8 +1,8 @@
 import { Canvas } from "@react-three/fiber";
 import { KeyboardControls, Loader } from "@react-three/drei";
-import { OrbitControls } from "@react-three/drei";
 
 import Scene from "./scenes/Scene";
+import Overlay from "./components/Overlay";
 
 import "./Experience.css";
 
@@ -16,7 +16,6 @@ export default function Experience() {
           { name: "left", keys: ["ArrowLeft"] },
           { name: "right", keys: ["ArrowRight"] },
           { name: "shoot", keys: ["KeyX"] },
-          { name: "reset", keys: ["KeyR"] },
         ]}
       >
         <Canvas
@@ -29,15 +28,10 @@ export default function Experience() {
           }}
         >
           <Scene />
-          <OrbitControls
-            target={[0, 3, 3]}
-            enablePan={false}
-            enableZoom={true}
-            enableRotate={false}
-          />
         </Canvas>
         <Loader />
       </KeyboardControls>
+      <Overlay />
     </div>
   );
 }

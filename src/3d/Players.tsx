@@ -19,6 +19,7 @@ import {
   SHOOT_TIME,
   SHOOT_VELOCITY,
   VELOCITY,
+  SHOOT_VERTICAL_VELOCITY,
 } from "../utils/constants";
 import { smoothAngle } from "../utils/angles";
 import { getAnimation } from "../utils/animation";
@@ -26,16 +27,18 @@ import { randomStartPos } from "../utils/randomPosition";
 
 import useGame from "../store/useGame";
 
-import { ActionName, Character } from "./Character";
+import { ActionName, Character, TTeam } from "./Character";
 
 const SocketPlayer = forwardRef(
   (
     {
       position,
       rotation,
+      team,
     }: {
       position: THREE.Vector3 | undefined;
       rotation: THREE.Euler | undefined;
+      team: TTeam;
     },
     ref: Ref<THREE.Group> | undefined
   ) => {
@@ -45,6 +48,7 @@ const SocketPlayer = forwardRef(
     useFrame(() => {
       if (!ref) return;
 
+      // update animation
       if (currentAnimation !== ref?.current?.name || "Idle") {
         setCurrentAnimation(ref?.current?.name || "Idle");
       }
@@ -53,7 +57,7 @@ const SocketPlayer = forwardRef(
     return (
       <group ref={ref} position={position} rotation={rotation}>
         <Suspense fallback={null}>
-          <Character animation={currentAnimation} />
+          <Character animation={currentAnimation} team={team} />
         </Suspense>
       </group>
     );
@@ -104,30 +108,41 @@ export default function Players() {
 
       const startPos = randomStartPos(AREA_SIZE);
 
-      const currCharacter = (
-        <SocketPlayer
-          key={state.id}
-          ref={playerRef}
-          position={startPos}
-          rotation={new THREE.Euler(0, 0, 0)}
-        />
-      );
+      let team;
 
       if (isHost()) {
+        // physicial body
         const currBody = (
           <LocalPlayer key={state.id} ref={bodyRef} position={startPos} />
         );
         setBodies((bodies) => [...bodies, currBody]);
+
+        // team
+        team = ["red", "blue", "black"][Math.floor(Math.random() * 2)];
+        state.setState("team", team);
+      } else {
+        team = "black";
       }
+
+      const currCharacter = (
+        <SocketPlayer
+          key={state.id}
+          id={state.id}
+          ref={playerRef}
+          position={startPos}
+          rotation={new THREE.Euler(0, 0, 0)}
+          team={team}
+        />
+      );
 
       setPlayers((players) => [...players, { state, playerRef, bodyRef }]);
       setCharacters((characters) => [...characters, currCharacter]);
 
-      state.onQuit(() => {
-        setCharacters((characters) =>
-          characters.filter((p) => p.state.id !== currCharacter.id)
-        );
-      });
+      // state.onQuit(() => {
+      //   setCharacters((characters) =>
+      //     characters.filter((p) => p.state.id !== state.id)
+      //   );
+      // });
     });
   }, []);
 
@@ -184,6 +199,13 @@ export default function Players() {
 
         // update shared position
         const pos = bodyRef.current.translation();
+
+        if (pos.y < -2) {
+          bodyRef.current.setTranslation({ x: 0, y: 2, z: 0 }, true);
+          bodyRef.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
+          bodyRef.current.setAngvel({ x: 0, y: 0, z: 0 }, true);
+        }
+
         state.setState("pos", pos);
 
         // update character
@@ -244,15 +266,9 @@ export default function Players() {
               Math.cos(ballAngle)
             );
 
-            const impulse = {
-              x: dir.x * SHOOT_VELOCITY * delta,
-              y: 0.35 * SHOOT_VELOCITY * delta,
-              z: dir.z * SHOOT_VELOCITY * delta,
-            };
-
-            updateImpulseX(impulse.x);
-            updateImpulseY(impulse.y);
-            updateImpulseZ(impulse.z);
+            updateImpulseX(dir.x * SHOOT_VELOCITY + linvel.x * 0.5);
+            updateImpulseY(SHOOT_VERTICAL_VELOCITY * SHOOT_VELOCITY);
+            updateImpulseZ(dir.z * SHOOT_VELOCITY + linvel.z * 0.5);
           }
         }
       } else {
@@ -291,6 +307,14 @@ export default function Players() {
         }
       }
     }
+
+    // update cameraPosition
+    const myPos = myPlayer().getState("pos");
+    const camera = state.camera;
+
+    if (!camera || !myPos) return;
+
+    camera.position.x = myPos.x < -3 ? -3 : myPos.x > 3 ? 3 : myPos.x;
   });
 
   return (

@@ -1,0 +1,10 @@
+.Points {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  display: flex;
+  justify-content: space-between;
+  font-size: 4Rem;
+  font-weight: 700;
+}

@@ -9,7 +9,8 @@ export const ROTATION_SPEED = 5;
 
 export const SHOOT_TIME = 0.8;
 
-export const SHOOT_VELOCITY = 200;
+export const SHOOT_VERTICAL_VELOCITY = 0.35;
+export const SHOOT_VELOCITY = 2;
 
 /*
 // // // ARENA

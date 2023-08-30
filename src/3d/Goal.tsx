@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { useGLTF } from "@react-three/drei";
 import { GLTF } from "three-stdlib";
 import { CuboidCollider, RigidBody } from "@react-three/rapier";
+import useGame from "../store/useGame";
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -43,14 +44,29 @@ const MODEL = "3d/stadium/goal.glb";
 export default function Goal({
   position,
   rotation,
+  team,
 }: {
   position: THREE.Vector3;
   rotation: THREE.Euler;
+  team: "red" | "blue";
 }) {
   const { nodes, materials } = useGLTF(MODEL) as GLTFResult;
+  const increasePoints = useGame((state) => state.increasePoints);
+
   return (
     <group position={position} rotation={rotation}>
       <RigidBody type={"fixed"} colliders={false}>
+        <CuboidCollider
+          args={[0.1, 0.9, 1.3]}
+          position={[0, 1, 0]}
+          sensor
+          onIntersectionEnter={(e) => {
+            const objectName = e.rigidBodyObject?.name;
+            if (objectName === "ball") {
+              increasePoints(team);
+            }
+          }}
+        />
         <CuboidCollider args={[0.1, 1, 0.1]} position={[-0.3, 1.1, -1.5]} />
         <CuboidCollider args={[0.1, 0.1, 1.7]} position={[-0.3, 2.2, 0]} />
         <CuboidCollider args={[0.1, 1, 0.1]} position={[-0.3, 1.1, 1.5]} />

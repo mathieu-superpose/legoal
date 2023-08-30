@@ -10,12 +10,12 @@ export default function Flags() {
     <group>
       <Flag
         position={new THREE.Vector3(-10, 1, 5)}
-        rotation={new THREE.Euler(0, 0, 0)}
+        rotation={new THREE.Euler(0, -Math.PI/2, 0)}
         color={redColor}
       />
       <Flag
         position={new THREE.Vector3(-10, 1, -5)}
-        rotation={new THREE.Euler(0, 0, 0)}
+        rotation={new THREE.Euler(0, Math.PI, 0)}
         color={redColor}
       />
       <Flag
@@ -25,7 +25,7 @@ export default function Flags() {
       />
       <Flag
         position={new THREE.Vector3(10, 1, -5)}
-        rotation={new THREE.Euler(0, 0, 0)}
+        rotation={new THREE.Euler(0, Math.PI/2, 0)}
         color={blueColor}
       />
     </group>
