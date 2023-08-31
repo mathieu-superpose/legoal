@@ -5,6 +5,7 @@ import Walls from "./Walls";
 import Arena from "./Arena";
 import Flags from "./Flags";
 import Logo from "./Logo/Logo";
+import Zone from "./Zone/Zone";
 
 export default function Stadium() {
   return (
@@ -23,7 +24,7 @@ export default function Stadium() {
       <Walls />
       <Flags />
       <Logo />
+      <Zone />
     </group>
   );
 }
-
