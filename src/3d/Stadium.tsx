@@ -4,6 +4,7 @@ import Goal from "./Goal";
 import Walls from "./Walls";
 import Arena from "./Arena";
 import Flags from "./Flags";
+import Logo from "./Logo/Logo";
 
 export default function Stadium() {
   return (
@@ -21,6 +22,8 @@ export default function Stadium() {
       />
       <Walls />
       <Flags />
+      <Logo />
     </group>
   );
 }
+
